@@ -1,8 +1,9 @@
 # API REST de TodoList avec Symfony et Docker pour gerer l'environement et les dependances
 
+> [!IMPORTANT]
+> Vous devez avoir docker🐋 d'installer dans votre Ordi
 
-
-## Set up le projet, ça ne demande pas beacoup 😅  
+## Set up le projet, ça ne demande pas beacoup @-@  
 
 Cloner le projet
 
@@ -35,12 +36,19 @@ composer update
 ~~~
 
 Effectuer les migrations vers la base de donneé
+
 ~~~bash
 symfony console doctrine:database:create
-
+~~~
+~~~bash
 symfony console make:migration
-
+~~~
+~~~bash
 symfony console doctrine:migrations:migrate
 ~~~
+> [!NOTE]
+> Si vous avez des erreurs sur des bases de données déja crées ou existantes?
+> pas d'inquiétude,
+> ### conitnuez 
 
-une fois tout installer vous pouvez lancer l'API 
+une fois tout Terminer vous pouvez lancer l'API http://localhost/ 
