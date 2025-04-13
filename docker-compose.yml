@@ -1,0 +1,36 @@
+version: '3.5'
+
+services:
+    database:
+        container_name: database
+        image: mysql:8.0
+        environment:
+            MYSQL_ROOT_PASSWORD: root_password
+            MYSQL_DATABASE: dbtest
+            MYSQL_USER: mysql_user
+            MYSQL_PASSWORD: password
+        ports:
+            - '4306:3306'
+
+
+    php:
+        container_name: "php-fpm"
+        build:
+            context: ./docker/php
+        volumes:
+            - ./project/:/var/www
+        depends_on:
+            - database
+
+    nginx:
+        container_name: "nginx"
+        build:
+            context: ./docker/nginx
+        volumes:
+            - ./project/:/var/www
+            - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+            - ./docker/logs:/var/log
+        depends_on:
+            - php
+        ports:
+            - "80:80"

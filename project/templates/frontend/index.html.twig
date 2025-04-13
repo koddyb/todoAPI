@@ -1,0 +1,148 @@
+{% extends 'base.html.twig' %}
+{% block title %}Gestion des Tâches{% endblock %}
+
+{# Formulaire assez simple 😅 #}
+{% block body %}
+  <div class="container mx-auto p-6 bg-gray-900 min-h-screen text-gray-100">
+    <h1 class="text-4xl font-extrabold mb-6">Gestion des Tâches</h1>
+    <div id="task-form" class="mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Ajouter une nouvelle tâche</h2>
+      <form id="create-task-form" class="bg-gray-800 p-6 rounded-lg shadow-lg">
+        <div class="mb-4">
+          <label class="block text-gray-300 mb-1">Titre</label>
+          <input type="text" id="titre" name="titre" class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Titre de la tâche" required>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-300 mb-1">Description</label>
+          <textarea id="description" name="description" class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Description de la tâche"></textarea>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-300 mb-1">Statut</label>
+          <select id="status" name="status" class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <option value="pending">En attente</option>
+            <option value="completed">Terminée</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
+          Créer la tâche
+        </button>
+      </form>
+    </div>
+    
+    {# sction pour l'affichage de la liste des tâches #}
+    <div id="task-list">
+      <h2 class="text-2xl font-semibold mb-4">Liste des Tâches</h2>
+      <ul id="tasks" class="space-y-4"></ul>
+    </div>
+  </div>
+
+  {# Script javaScript pour interagir avec l'apI et mettre à jour l'interface #}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // URL de base de l'API
+      const apiUrl = 'http://localhost/api/tasks';
+
+      // Fonction pour récupérer et afficher toutes les tâches
+      function fetchTasks() {
+        fetch(apiUrl)
+          .then(response => response.json())
+          .then(data => {
+            const tasksContainer = document.getElementById('tasks');
+            // On vide le contenu du formulaire avant de le remplir
+            tasksContainer.innerHTML = '';
+            // On parcour la liste des tâches pour créer dynamiquement les elements de la liste
+            data.forEach(task => {
+              const li = document.createElement('li');
+              li.className = 'bg-gray-800 p-6 rounded-lg shadow-lg flex justify-between items-center';
+              li.innerHTML = `
+                <div>
+                  {# Affichage du titre, de la description et du statut de la tâche #}
+                  <h3 class="text-xl font-bold">${task.titre}</h3>
+                  <p class="text-gray-400">${task.description || ''}</p>
+                  <p class="text-sm">${task.status}</p>
+                </div>
+                <div>
+                  {# Bouton pour mettre à jour le statut de la tâche #}
+                  <button data-id="${task.id}" class="update-btn bg-green-600 hover:bg-green-700 text-white font-semibold py-1 px-3 rounded mr-2 transition-colors">
+                    Modifier
+                  </button>
+                  {# Bouton pour supprimer la tâche #}
+                  <button data-id="${task.id}" class="delete-btn bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded transition-colors">
+                    Supprimer
+                  </button>
+                </div>
+              `;
+              // Ajouter l'element <li> au conteneur
+              tasksContainer.appendChild(li);
+            });
+            // on attache les eveneements aux bouttons 
+            attachEventListeners();
+          })
+          .catch(error => console.error('Erreur lors de la récupération des tâches :', error));
+      }
+
+      // Fonction pour attacher les evenements aux boutons de mise a jour et suppression!
+      function attachEventListeners() {
+        // pour le boutton "delete"
+        document.querySelectorAll('.delete-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const taskId = this.getAttribute('data-id');
+            if (confirm('Voulez-vous vraiment supprimer cette tâche ?')) {
+              fetch(`${apiUrl}/${taskId}`, { method: 'DELETE' })
+                .then(response => response.json())
+                .then(() => fetchTasks())  // Rechargement de la liste aprs suppression
+                .catch(error => console.error('Erreur lors de la suppression de la tâche :', error));
+            }
+          });
+        });
+
+        // Pour le bouton "update"
+        document.querySelectorAll('.update-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const taskId = this.getAttribute('data-id');
+            const li = this.closest('li');
+            // Récupérer le statut actuel 
+            const currentStatus = li.querySelector('p.text-sm').innerText.trim();
+            // Bascule du statut si "Terminée", passer à "En attente" vice-versa
+            const newStatus = (currentStatus === 'Terminée' ? 'En attente' : 'Terminée');
+            fetch(`${apiUrl}/${taskId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: newStatus })
+            })
+            .then(response => response.json())
+            .then(() => fetchTasks())  // Rechargement de la liste après mise à jour
+            .catch(error => console.error('Erreur lors de la mise à jour de la tâche :', error));
+          });
+        });
+      }
+
+      // gestion de la soumission du formulaire de création d'une tâche
+      const createForm = document.getElementById('create-task-form');
+      createForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const titre = document.getElementById('titre').value;
+        const description = document.getElementById('description').value;
+        const status = document.getElementById('status').value;
+
+        // Envoi de la requette POST à l'API pour créer une nouvelle tâche
+        fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ titre, description, status })
+        })
+        .then(response => response.json())
+        .then(() => {
+          // Réinitialisation du formulaire après création
+          createForm.reset();
+          // Rechargement de la liste des tâches pour afficher la nouvelle tâche
+          fetchTasks();
+        })
+        .catch(error => console.error('Erreur lors de la création de la tâche :', error));
+      });
+
+      fetchTasks();
+    });
+  </script>
+{% endblock %}
