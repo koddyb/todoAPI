@@ -49,6 +49,7 @@ symfony console doctrine:migrations:migrate
 > [!NOTE]
 > Si vous avez des erreurs sur des bases de données déja crées ou existantes?
 > pas d'inquiétude,
-> ### conitnuez 
+> ### conitnuez
+> Assurez vous de n'avoir aucun serveur lancer sur localhost!
 
 une fois tout Terminer vous pouvez lancer l'API http://localhost/ 
