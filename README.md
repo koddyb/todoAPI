@@ -26,7 +26,7 @@ docker-compose up -d --build
 Accerder au projet symfony
 
 ~~~bash  
-npm run startdocker exec -it php-fpm bash
+ docker exec -it php-fpm  bash                                                                      
 ~~~
 
 mettre à jours les dépendences 
