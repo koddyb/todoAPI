@@ -52,4 +52,4 @@ symfony console doctrine:migrations:migrate
 > ### conitnuez
 > Assurez vous de n'avoir aucun aute serveur lancé sur localhost!
 
-une fois tout Terminer vous pouvez lancer l'API http://localhost/ 
+une fois tout Terminer, attendez 2 minutes et vous pouvez lancer l'API http://localhost/ 
