@@ -29,10 +29,10 @@ Accerder au projet symfony
  docker exec -it php-fpm  bash                                                                      
 ~~~
 
-mettre à jours les dépendences 
+Installer et mettre à jours les dépendences 
 
 ~~~bash
-composer update
+composer install && composer update
 ~~~
 
 Effectuer les migrations vers la base de donneé
